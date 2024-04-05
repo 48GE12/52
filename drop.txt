@@ -16,7 +16,7 @@ def kill_browser_processes(browser_name):
 def delete_cookies_file(browser_name):
     cookies_paths = {
         'edge': r'Microsoft\Edge\User Data\Default\Network\Cookies',
-        'chrome': r'Google\Chrome\User Data\Default\Cookies'
+        'chrome': r'Google\Chrome\User Data\Default\Network\Cookies'
     }
     
     cookie_path = os.path.join(os.getenv('LOCALAPPDATA'), cookies_paths[browser_name])
