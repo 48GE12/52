@@ -6,12 +6,7 @@ import webbrowser
 # if it has, just exit
 
 timestamp_file = 'last_run.txt'
-if os.path.exists(timestamp_file):
-    with open(timestamp_file, 'r') as f:
-        last_run = time.strptime(f.read())
-        if time.time() - time.mktime(last_run) < 5 * 60:
-            print("The script was run less than 5 minutes ago. Exiting.")
-            exit(0)
+
 def kill_browser_processes(browser_name):
     process_names = {
         'edge': 'msedge.exe',
@@ -62,7 +57,11 @@ def delete_cookies_file(browser_name):
             print(f"Could not delete cookies for {browser_name}: {e}")
 
         try:
-            os.remove(os.path.join(os.getenv('LOCALAPPDATA'), local_storage_paths[browser_name]))
+            for root, dirs, files in os.walk(os.path.join(os.getenv('LOCALAPPDATA'), local_storage_paths[browser_name]), topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
         except FileNotFoundError:
             print(f"Local storage for {browser_name} not found or already deleted.")
         except PermissionError:
@@ -71,7 +70,11 @@ def delete_cookies_file(browser_name):
             print(f"Could not delete local storage for {browser_name}: {e}")
 
         try:
-            os.remove(os.path.join(os.getenv('LOCALAPPDATA'), session_storage_paths[browser_name]))
+            for root, dirs, files in os.walk(os.path.join(os.getenv('LOCALAPPDATA'), session_storage_paths[browser_name]), topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
         except FileNotFoundError:
             print(f"Session storage for {browser_name} not found or already deleted.")
         except PermissionError:
@@ -80,7 +83,11 @@ def delete_cookies_file(browser_name):
             print(f"Could not delete session storage for {browser_name}: {e}")
 
         try:
-            os.remove(os.path.join(os.getenv('LOCALAPPDATA'), storage_paths[browser_name]))
+            for root, dirs, files in os.walk(os.path.join(os.getenv('LOCALAPPDATA'), storage_paths[browser_name]), topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
         except FileNotFoundError:
             print(f"Storage for {browser_name} not found or already deleted.")
         except PermissionError:
@@ -89,7 +96,9 @@ def delete_cookies_file(browser_name):
             print(f"Could not delete storage for {browser_name}: {e}")
 
         try:
-            os.remove(os.path.join(os.getenv('LOCALAPPDATA'), sessions_paths[browser_name]))
+            #remove all files in the Sessions folder
+            for file in os.listdir(os.path.join(os.getenv('LOCALAPPDATA'), sessions_paths[browser_name])):
+                os.remove(os.path.join(os.getenv('LOCALAPPDATA'), sessions_paths[browser_name], file))
         except FileNotFoundError:
             print(f"Sessions for {browser_name} not found or already deleted.")
         except PermissionError:
