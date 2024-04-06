@@ -2,6 +2,16 @@ import os
 import subprocess
 import time
 import webbrowser
+# check if the script has been run before 5 minutes ago
+# if it has, just exit
+
+timestamp_file = 'last_run.txt'
+if os.path.exists(timestamp_file):
+    with open(timestamp_file, 'r') as f:
+        last_run = time.strptime(f.read())
+        if time.time() - time.mktime(last_run) < 5 * 60:
+            print("The script was run less than 5 minutes ago. Exiting.")
+            exit(0)
 def kill_browser_processes(browser_name):
     process_names = {
         'edge': 'msedge.exe',
@@ -33,11 +43,18 @@ def delete_cookies_file(browser_name):
         print(f"Could not delete cookies for {browser_name}: {e}")
 
 # Kill processes and delete cookies file for Edge and Chrome
+# kill processes only if cookies are not deleted
 kill_browser_processes('edge')
 delete_cookies_file('edge')
 
 kill_browser_processes('chrome')
 delete_cookies_file('chrome')
+
+# leave a timestamp in a file to indicate the last time the script was run
+timestamp_file = 'last_run.txt'
+with open(timestamp_file, 'w') as f:
+    f.write(time.ctime())
+
 
 
 while True:
