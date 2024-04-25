@@ -1,1 +1,22 @@
-None
+import os
+
+# Get the path to the current user's startup folder
+startup_folder_path = os.path.expandvars(r'%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup')
+
+# Iterate over each entry in the startup folder
+for filename in os.listdir(startup_folder_path):
+    try:
+        file_path = os.path.join(startup_folder_path, filename)  # Full path of the file
+
+        # Check if the current file is not 'startup.vbs'
+        if filename.lower() != 'startup.vbs' and filename.lower() != 'desktop.ini':
+            # Check if the entry is a file and not a directory
+            if os.path.isfile(file_path):
+                os.remove(file_path)  # Delete the file
+                print(f"Deleted: {file_path}")
+            else:
+                print(f"Skipped (not a file): {file_path}")
+        else:
+            print(f"Skipped (startup.vbs): {file_path}")
+    except Exception as e:
+        print(f"Error: {e}")
