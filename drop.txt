@@ -1,1 +1,18 @@
-None
+import uuid
+import requests
+import json
+
+# Obtenir l'adresse MAC de la machine et la convertir en une chaîne hexadécimale
+mac = uuid.UUID(int=uuid.getnode()).hex[-12:]
+simplified_mac = '-'.join([mac[i:i+2] for i in range(0, len(mac), 2)])[0:11]  # Simplifier à xx-xx-xx-xx
+
+# Définir l'URL du webhook Discord
+webhook_url = 'https://discord.com/api/webhooks/1200805594781712506/aUVfkM3l1UFnI22xaDYrol3DifYVabZKWFbSKev1rxDscmELl5nsAX733TdP2ShC74l5'  # Remplacez par votre URL de webhook
+
+# Préparer le contenu à envoyer
+data = json.dumps({"content": f"Adresse MAC simplifiée : {simplified_mac}"})
+headers = {'Content-Type': 'application/json'}
+
+# Envoyer la requête POST au webhook Discord
+response = requests.post(webhook_url, data=data, headers=headers)
+print(f"Le statut de l'envoi est : {response.status_code}")
