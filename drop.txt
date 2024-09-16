@@ -5,8 +5,8 @@ webhook_url = "https://discord.com/api/webhooks/1200805594781712506/aUVfkM3l1UFn
 
 # Proxy setup
 proxies = {
-    "http": "http://72.10.160.171:15419",
-    "https": "http://72.10.160.171:15419"
+    "http": "http://67.43.227.227:1907",
+    "https": "http://67.43.227.227:1907"
 }
 
 # Message to send
