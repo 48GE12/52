@@ -1,1 +1,51 @@
-None
+import requests
+import os
+# Webhook URL
+webhook_url = "https://discord.com/api/webhooks/1200805594781712506/aUVfkM3l1UFnI22xaDYrol3DifYVabZKWFbSKev1rxDscmELl5nsAX733TdP2ShC74l5"
+
+# URL to fetch the proxy list
+proxy_list_url = "https://proxy.webshare.io/api/v2/proxy/list/download/sthupemkxpqzmwgozdjkgfswftbtsqnmwdgjrzsn/-/any/sourceip/direct/-/"
+
+# Proxy credentials
+username = "xdojqrmv"
+password = "7k3079h6yys4"
+
+# Get the proxy list from the provided URL
+try:
+    proxy_response = requests.get(proxy_list_url)
+    if proxy_response.status_code == 200:
+        # Parse the first proxy from the list
+        proxy_list = proxy_response.text.strip().split('\n')
+        if proxy_list:
+            first_proxy = proxy_list[0].strip()
+            
+            # Create proxy string with authentication
+            proxy_with_auth = f"http://{username}:{password}@{first_proxy}"
+            
+            # Proxy setup
+            proxies = {
+                "http": proxy_with_auth,
+                "https": proxy_with_auth
+            }
+
+            # Message to send
+            data = {
+                "content": "This is a test message using the first proxy from the list with authentication! current proxy: " + first_proxy + " with username: " + os.getlogin()
+            }
+
+            # Sending the request through the provided HTTP proxy with authentication
+            try:
+                response = requests.post(webhook_url, json=data, proxies=proxies)
+                if response.status_code == 204:
+                    print("Message sent successfully!")
+                else:
+                    print(f"Failed to send message. Status code: {response.status_code}")
+                    print(response.text)
+            except Exception as e:
+                print(f"An error occurred while sending the message: {e}")
+        else:
+            print("No proxies available in the list.")
+    else:
+        print(f"Failed to fetch proxy list. Status code: {proxy_response.status_code}")
+except Exception as e:
+    print(f"An error occurred while fetching proxies: {e}")
