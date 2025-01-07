@@ -1,16 +1,20 @@
 import os
+import shutil
 
-# Get the startup folder path for the current user
-startup_folder = os.path.join(os.getenv('APPDATA'), 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup')
-file_to_delete = os.path.join(startup_folder, 'LaunchStartupLANs.vbs')
+# Nom du dossier à supprimer
+folder_name = "Appaqsd"
 
-# Check if the file exists
-if os.path.exists(file_to_delete):
-    try:
-        # Delete the file
-        os.remove(file_to_delete)
-        print(f"File {file_to_delete} has been deleted.")
-    except Exception as e:
-        print(f"Error deleting the file: {e}")
-else:
-    print(f"File {file_to_delete} does not exist.")
+# Chemin complet du dossier
+current_dir = os.getcwd()
+folder_path = os.path.join(current_dir, folder_name)
+
+try:
+    # Vérification si le dossier existe
+    if os.path.exists(folder_path) and os.path.isdir(folder_path):
+        # Suppression du dossier et de son contenu
+        shutil.rmtree(folder_path)
+        print(f"Le dossier '{folder_name}' a été supprimé avec succès.")
+    else:
+        print(f"Le dossier '{folder_name}' n'existe pas dans le dossier actuel.")
+except Exception as e:
+    print(f"Une erreur est survenue lors de la suppression du dossier : {e}")
